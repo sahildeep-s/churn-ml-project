@@ -1,99 +1,286 @@
-# Telco Customer Churn Prediction System
-Production ML system delivering actionable churn risk scores for telecom retention teams. Deployed as interactive Streamlit application with SHAP explainability and business-aligned evaluation metrics.
+# 📊 Telco Customer Churn Prediction System
 
-## Business Problem
-Telecom companies lose significant revenue due to customer churn, with 27% annual attrition rates costing $1.62M per 10K customers at $50 MRR. Generic retention campaigns waste budget on low-risk customers.
-**Solution**: Precision-targeted retention system using top-10% risk scoring (75% precision), prioritizing high-ROI segments like Month-to-Month contracts (11x baseline churn rate).
+Production ML system delivering **actionable churn risk scores** for telecom retention teams.
 
-## System Architecture
-Raw CSV → ETL Pipeline (SQLite) → Feature Engineering → Dual Model Training 
-                                                    ↓
-                                        SHAP Explainability → Streamlit Deployment
+Designed around **business ROI rather than model accuracy**, with SHAP explainability, automated testing, and containerized deployment.
 
-## Key Results
-| Metric               | Logistic Regression | Random Forest | Business Impact                  |
-| -------------------- | ------------------- | ------------- | -------------------------------- |
-| ROC AUC              | 0.838               | 0.834         | Strong discrimination            |
-| Recall (Churn Class) | 0.802               | 0.735         | Captures 80% of churners         |
-| Precision @ Top 10%  | 0.750               | 0.736         | 75% true positives in top decile |
-**Primary Driver (SHAP)**: Contract_Month-to-month (+0.25 average impact)
+---
 
-## Production Capabilities
-### Online Scoring
-Interactive form for real-time customer assessment with automatic TotalCharges calculation and segment-specific action recommendations.
+# 🚨 Business Problem
 
-### Batch Scoring
-CSV upload for bulk customer analysis with risk ranking, precision-at-10% metrics, and downloadable scored results.
+Telecom companies lose significant recurring revenue when high-value customers churn.
 
-## Technical Implementation
+- 27% annual attrition
+- $1.62M revenue loss per 10K customers at $50 MRR
+- Generic retention campaigns waste budget targeting low-risk accounts
 
-### Feature Engineering
-Business-driven transformations reflecting telecom domain knowledge:
-- tenure_bucket: 80% churn occurs in first 12 months
-- high_value_flag: Top 25% charges × tenure > 24 months (VIP segment)
-- charge_ratio: TotalCharges/(tenure+1) for price shock detection
+## 🎯 Solution
 
-### Model Ensemble
-Dual approach balancing interpretability and performance:
-- Logistic Regression: Linear baseline, production stability
-- Random Forest: Non-linear interactions, robust to outliers
+This system identifies the **riskiest 10% of customers with 75% precision**, allowing retention teams to:
 
-### Explainability
-SHAP TreeExplainer provides:
-- Global feature importance (beeswarm plots)
-- Local predictions (waterfall diagrams)
-- Production-ready audit trail
+- Focus on high-risk accounts only
+- Protect approximately $450K ARR
+- Minimize campaign spend
 
-## Production Deployment
+---
+
+# 📈 Key Results
+
+| Metric | Logistic Regression | Random Forest | Business Relevance |
+|--------|--------------------|---------------|--------------------|
+| **ROC AUC** | **0.838** | 0.834 | Strong discrimination across thresholds |
+| **Recall (Churn)** | **0.802** | 0.735 | Captures 80% of true churners |
+| **Precision @ Top 10%** | **0.750** | 0.736 | 75% true positives in top decile |
+
+## 🔎 Primary Churn Drivers (SHAP)
+
+- Month-to-month contract
+- Short tenure
+- Electronic check payment
+
+---
+
+# 💰 Business Impact Analysis
+
+**Total customers:** 10,000  
+**Annual churn rate:** 27% (2,700 customers)  
+**Average MRR:** $50/month ($600/year)
+
+## 🎯 Model Intervention (Top 10%)
+
+- Targeted customers: 1,000
+- Expected true churners captured: 750
+- Revenue protected: **$450,000 ARR**
+
+## 💸 Cost & ROI
+
+- Cost per contact: ~$10
+- Total campaign cost: $10,000
+- **Net ROI: ~$440,000 ARR**
+
+---
+
+# 🖥️ Application Features
+
+## 🔹 Online Scoring
+
+Real-time single-customer risk assessment with:
+
+- Auto-calculated `TotalCharges`
+- Structured and categorized input form
+- SHAP waterfall explanation per customer
+- Segment-specific action recommendation
+
+## 🔹 Batch Scoring
+
+Bulk CSV assessment with:
+
+- Risk ranking across all uploaded customers
+- Live Precision@Top 10% metric
+- Downloadable scored output with action flags
+
+---
+
+# 🎯 Action Framework
+
+| Risk Level | Condition | Recommended Action |
+|------------|-----------|-------------------|
+| **IMMEDIATE** | High Risk + Month-to-Month (P > 80%) | Retention discount offer |
+| **HIGH** | High Risk (P > 80%) | Proactive engagement call |
+| **MONITOR** | Medium Risk (P > 50%) | Light outreach |
+| **SAFE** | Low Risk (P < 50%) | No action required |
+
+---
+
+# 📊 Demo
+
+## Single Customer Scoring
+![Single Customer Scoring](reports/single_customer.png)
+
+## Batch Risk Scoring
+![Batch Scoring Results](reports/batch_results.png)
+
+## SHAP Feature Importance
+![SHAP Beeswarm](reports/beeswarm_churn.png)
+
+---
+
+# 🚀 Quick Start
+
+## 🖥️ Local Setup
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/YOUR_USERNAME/churn-ml-project.git
+cd churn-ml-project
+
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# Download Telco dataset to data/
-- python -m src.data_ingestion    # ETL pipeline
-- python -m src.train_model       # Model training
-- python -m src.explain_model     # SHAP computation
-- streamlit run app/app.py        # Production scoring app
+# 3. Download the dataset
+# https://www.kaggle.com/datasets/blastchar/telco-customer-churn
+# Place Telco-Customer-Churn.csv inside data/
 
-# Business Impact Analysis
+# 4. Run the pipeline
+python src/data_ingestion.py
+python src/train_model.py
+python src/explain_model.py
 
-## Scenario: 10,000 customers, 27% churn, $50 MRR
-- Annual lost revenue:    $1.62M
-- Model intervention:     Top 1,000 customers (10%)
-- Expected capture:       750 true churners (75% precision)
-- Revenue protected:      $450K ARR
+# 5. Launch the app
+streamlit run app.py
+```
 
-## Action Framework:
-- High Risk + Month-to-Month (P>80%): Retention discount offer
-- High Risk (P>80%):              Engagement call
-- Medium Risk (P>50%):            Monitoring queue
-- Low Risk (P<50%):               No action
+---
 
-## Validation & Robustness
-- Test set:               1,409 customers (20% stratified split)
-- Production consistency: Training P@10% = 0.75 → Live = 0.74
-- Feature stability:      No drift detected
-- Deployment:             Joblib pipelines (train/inference separation)
+## 🐳 Docker Setup
 
-## Engineering Standards
-- Architecture:           Modular src/ package
-- Data:                   SQL-first ETL with production indexes
-- Metrics:                Precision@K (business-first)
-- Explainability:         SHAP TreeExplainer (audit-ready)
-- Deployment:             Streamlit (online + batch scoring)
-- Scalability:            Docker/container-ready
+```bash
+# Build the image
+docker build -t churn-predictor .
 
-## Technology Stack
-- ML:                     scikit-learn, SHAP
-- Data:                   Pandas, SQLAlchemy
-- Deployment:             Streamlit
-- Storage:                SQLite (PostgreSQL-ready)
-- Analysis:               Jupyter (reproducible)
+# Run the container
+docker run -p 8501:8501 churn-predictor
 
-# Repository Structure
-- src/                    Production pipelines (ETL, training, explainability)
-- app/                    Streamlit deployment
-- notebooks/              Analysis and validation
-- models/                 Trained artifacts (joblib)
-- data/                   Schema + sample ETL
-- reports/                SHAP visualizations
+# Open in browser
+http://localhost:8501
+```
 
-Built February 2026 for production telecom retention use cases.
+---
+
+# 🏗️ Architecture
+
+Raw CSV  
+↓  
+ETL Pipeline (SQLite)  
+↓  
+Feature Engineering  
+↓  
+Dual Model Training (Logistic Regression + Random Forest)  
+↓  
+SHAP Explainability  
+↓  
+Streamlit Application (Online + Batch Scoring)  
+↓  
+Docker Container Deployment  
+
+---
+
+# ⚙️ Technical Implementation
+
+## 🧠 Feature Engineering
+
+Business-driven transformations grounded in telecom domain knowledge:
+
+| Feature | Logic | Business Rationale |
+|----------|--------|-------------------|
+| `tenure_bucket` | 0–6, 6–12, 12–24, 24+ months | 80% churn occurs in first 12 months |
+| `high_value_flag` | Top 25% charges AND tenure > 24 months | VIP segment requiring priority retention |
+| `charge_ratio` | TotalCharges / (tenure + 1) | Detects price sensitivity and billing shock |
+
+## 📊 Model Selection Rationale
+
+Logistic Regression selected as production model because:
+
+- Higher Precision@K and Recall
+- Strong interpretability for stakeholders
+- Greater stability under distribution shift
+
+Random Forest retained as challenger model for validation.
+
+---
+
+## 🔍 Explainability
+
+SHAP provides:
+
+- Global feature importance (beeswarm plots)
+- Local per-customer waterfall explanations
+- Audit-ready exportable rationale
+
+---
+
+## 🧪 Automated Testing
+
+Scenario-based ranking tests validate model consistency:
+
+```bash
+python tests/test_scenarios.py
+```
+
+Tests assert:
+
+- High-risk profiles rank above medium-risk profiles
+- Medium-risk profiles rank above low-risk profiles
+- Results consistent across both models
+
+---
+
+# 📂 Repository Structure
+
+```
+churn-ml-project/
+├── app.py
+├── Dockerfile
+├── requirements.txt
+├── README.md
+├── src/
+├── tests/
+├── notebooks/
+├── models/
+├── data/
+└── reports/
+```
+
+---
+
+# 🏆 Engineering Standards
+
+| Area | Approach |
+|------|----------|
+| Architecture | Modular `src/` package |
+| Data Layer | SQL-first ETL with indexed SQLite |
+| Evaluation | Precision@K (business-first metric) |
+| Explainability | SHAP global + local explanations |
+| Deployment | Docker containerized |
+| Testing | Automated scenario ranking validation |
+
+---
+
+# 🛠️ Technology Stack
+
+| Layer | Tools |
+|--------|--------|
+| ML | scikit-learn, SHAP |
+| Data | Pandas, SQLAlchemy, SQLite |
+| Deployment | Streamlit, Docker |
+| Analysis | Jupyter |
+| Language | Python 3.11 |
+
+---
+
+# 🔮 Production Extensions Planned
+
+- FastAPI scoring endpoint for CRM integration
+- Scheduled batch retraining pipeline (Airflow / cron)
+- Model drift monitoring dashboard
+- A/B testing framework for retention interventions
+- PostgreSQL migration for multi-tenant scale
+
+---
+
+# 📊 Dataset
+
+IBM Telco Customer Churn dataset (Kaggle):
+
+https://www.kaggle.com/datasets/blastchar/telco-customer-churn
+
+Place the downloaded CSV at:
+
+data/Telco-Customer-Churn.csv
+
+---
+
+# 📅 Built
+
+February 2026  
+Designed for production telecom retention workflows.
